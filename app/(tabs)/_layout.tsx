@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Calendar, Clock, MapPin, User } from 'lucide-react-native';
+import { Calendar, Clock, User, Globe } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
@@ -28,18 +28,27 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Schedule',
+          title: 'My Events',
           tabBarIcon: ({ size, color }) => (
             <Calendar size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="routes"
+        name="schedule"
         options={{
-          title: 'Routes',
+          title: 'My Schedule',
           tabBarIcon: ({ size, color }) => (
-            <MapPin size={size} color={color} />
+            <Clock size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="public"
+        options={{
+          title: 'Public Profile',
+          tabBarIcon: ({ size, color }) => (
+            <Globe size={size} color={color} />
           ),
         }}
       />

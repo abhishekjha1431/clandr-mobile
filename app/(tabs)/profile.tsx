@@ -1,20 +1,60 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
-import { User, Settings, Bell, MapPin, Calendar, Clock, ChevronRight } from 'lucide-react-native';
+import { User, Settings, Bell, Calendar, Globe, ChevronRight, ExternalLink } from 'lucide-react-native';
 
 export default function ProfileScreen() {
+  const [calendarSync, setCalendarSync] = useState(true);
+  const [notifications, setNotifications] = useState(true);
+  const [publicProfile, setPublicProfile] = useState(true);
+
   const profileStats = [
-    { label: 'Events This Month', value: '24', icon: Calendar },
-    { label: 'Total Distance', value: '1,247 mi', icon: MapPin },
-    { label: 'Time Saved', value: '8.5 hrs', icon: Clock }
+    { label: 'Total Events', value: '4', icon: Calendar },
+    { label: 'Active Events', value: '3', icon: Globe },
+    { label: 'Monthly Bookings', value: '38', icon: User }
   ];
 
-  const menuItems = [
-    { label: 'Notifications', icon: Bell, hasSwitch: true },
-    { label: 'Location Services', icon: MapPin, hasSwitch: true },
-    { label: 'Calendar Sync', icon: Calendar, hasSwitch: false },
-    { label: 'Settings', icon: Settings, hasSwitch: false }
+  const quickLinks = [
+    { label: 'My Events', icon: Calendar, screen: 'index' },
+    { label: 'My Schedule', icon: Calendar, screen: 'schedule' },
+    { label: 'Public Profile', icon: Globe, screen: 'public' }
   ];
+
+  const preferences = [
+    { 
+      label: 'Calendar Sync', 
+      description: 'Sync with Google Calendar',
+      value: calendarSync, 
+      onToggle: () => setCalendarSync(!calendarSync)
+    },
+    { 
+      label: 'Notifications', 
+      description: 'Booking and reminder notifications',
+      value: notifications, 
+      onToggle: () => setNotifications(!notifications)
+    },
+    { 
+      label: 'Public Profile', 
+      description: 'Allow others to book your events',
+      value: publicProfile, 
+      onToggle: () => setPublicProfile(!publicProfile)
+    }
+  ];
+
+  const accountSettings = [
+    { label: 'Account Settings', icon: User },
+    { label: 'Privacy & Security', icon: Settings },
+    { label: 'Help & Support', icon: Bell },
+    { label: 'About', icon: Settings }
+  ];
+
+  const ToggleSwitch = ({ value, onToggle }: { value: boolean; onToggle: () => void }) => (
+    <TouchableOpacity
+      onPress={onToggle}
+      className={`w-12 h-6 rounded-full p-1 ${value ? 'bg-blue-500' : 'bg-gray-300'}`}
+    >
+      <View className={`w-4 h-4 bg-white rounded-full shadow-sm transition-all ${value ? 'ml-auto' : ''}`} />
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -49,29 +89,60 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Menu Items */}
+        {/* Quick Links */}
+        <View className="bg-white rounded-3xl shadow-lg p-6 mx-4 mb-6">
+          <Text className="text-xl font-bold text-gray-800 mb-4">Quick Links</Text>
+          
+          {quickLinks.map((link, index) => (
+            <TouchableOpacity
+              key={index}
+              className="flex-row items-center justify-between py-4 border-b border-gray-100 last:border-b-0"
+            >
+              <View className="flex-row items-center">
+                <View className="bg-blue-50 rounded-full p-2 mr-3">
+                  <link.icon size={20} color="#3B82F6" />
+                </View>
+                <Text className="text-gray-800 font-medium">{link.label}</Text>
+              </View>
+              <ExternalLink size={20} color="#6B7280" />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Preferences */}
         <View className="bg-white rounded-3xl shadow-lg p-6 mx-4 mb-6">
           <Text className="text-xl font-bold text-gray-800 mb-4">Preferences</Text>
           
-          {menuItems.map((item, index) => (
+          {preferences.map((pref, index) => (
+            <View
+              key={index}
+              className="flex-row items-center justify-between py-4 border-b border-gray-100 last:border-b-0"
+            >
+              <View className="flex-1">
+                <Text className="text-gray-800 font-medium mb-1">{pref.label}</Text>
+                <Text className="text-gray-500 text-sm">{pref.description}</Text>
+              </View>
+              <ToggleSwitch value={pref.value} onToggle={pref.onToggle} />
+            </View>
+          ))}
+        </View>
+
+        {/* Account Settings */}
+        <View className="bg-white rounded-3xl shadow-lg p-6 mx-4 mb-6">
+          <Text className="text-xl font-bold text-gray-800 mb-4">Account</Text>
+          
+          {accountSettings.map((setting, index) => (
             <TouchableOpacity
               key={index}
               className="flex-row items-center justify-between py-4 border-b border-gray-100 last:border-b-0"
             >
               <View className="flex-row items-center">
                 <View className="bg-gray-50 rounded-full p-2 mr-3">
-                  <item.icon size={20} color="#6B7280" />
+                  <setting.icon size={20} color="#6B7280" />
                 </View>
-                <Text className="text-gray-800 font-medium">{item.label}</Text>
+                <Text className="text-gray-800 font-medium">{setting.label}</Text>
               </View>
-              
-              {item.hasSwitch ? (
-                <View className="w-12 h-6 bg-blue-500 rounded-full p-1">
-                  <View className="w-4 h-4 bg-white rounded-full ml-auto shadow-sm" />
-                </View>
-              ) : (
-                <ChevronRight size={20} color="#6B7280" />
-              )}
+              <ChevronRight size={20} color="#6B7280" />
             </TouchableOpacity>
           ))}
         </View>
@@ -81,17 +152,14 @@ export default function ProfileScreen() {
           <Text className="text-xl font-bold text-gray-800 mb-4">Recent Activity</Text>
           
           {[
-            { action: 'Completed Team Sync', time: '2 hours ago', location: 'London to Southampton' },
-            { action: 'Updated route preferences', time: '1 day ago', location: 'Settings' },
-            { action: 'Scheduled Design Review', time: '2 days ago', location: 'London to Brighton' }
+            { action: 'Created new event "Play football⚽"', time: '2 hours ago' },
+            { action: 'Updated schedule availability', time: '1 day ago' },
+            { action: 'Received booking for Coffee Chat', time: '2 days ago' },
+            { action: 'Enabled calendar sync', time: '3 days ago' }
           ].map((activity, index) => (
             <View key={index} className="py-3 border-b border-gray-100 last:border-b-0">
               <Text className="text-gray-800 font-medium mb-1">{activity.action}</Text>
-              <View className="flex-row items-center">
-                <Text className="text-gray-500 text-sm">{activity.time}</Text>
-                <Text className="text-gray-400 text-sm mx-2">•</Text>
-                <Text className="text-gray-500 text-sm">{activity.location}</Text>
-              </View>
+              <Text className="text-gray-500 text-sm">{activity.time}</Text>
             </View>
           ))}
         </View>

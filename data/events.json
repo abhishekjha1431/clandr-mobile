@@ -1,46 +1,38 @@
 [
   {
     "id": 1,
-    "title": "Team Sync",
-    "from": "London",
-    "to": "Southampton",
-    "time": "09:30",
-    "participants": ["Chris", "Garret"],
-    "icons": ["car", "calendar"],
-    "date": "2024-11-15",
-    "duration": "1h 30m"
+    "title": "Play football⚽",
+    "description": "Play football with me. Make some time to go outside and play!",
+    "duration": 60,
+    "active": true,
+    "bookings": 12,
+    "created": "2024-11-10"
   },
   {
     "id": 2,
-    "title": "Design Review",
-    "from": "London",
-    "to": "Southampton",
-    "time": "13:00",
-    "participants": ["Christina", "Olga"],
-    "icons": ["bike", "calendar"],
-    "date": "2024-11-15",
-    "duration": "2h"
+    "title": "Coffee Chat ☕",
+    "description": "Let's grab a coffee and discuss your project ideas. Perfect for networking and collaboration.",
+    "duration": 30,
+    "active": true,
+    "bookings": 8,
+    "created": "2024-11-08"
   },
   {
     "id": 3,
-    "title": "Client Meeting",
-    "from": "London",
-    "to": "Brighton",
-    "time": "15:30",
-    "participants": ["Alex", "Sarah"],
-    "icons": ["train", "calendar"],
-    "date": "2024-11-15",
-    "duration": "1h"
+    "title": "Design Review 🎨",
+    "description": "Get feedback on your design work. I'll review your portfolio and provide constructive feedback.",
+    "duration": 45,
+    "active": false,
+    "bookings": 3,
+    "created": "2024-11-05"
   },
   {
     "id": 4,
-    "title": "Project Kickoff",
-    "from": "Manchester",
-    "to": "Liverpool",
-    "time": "10:00",
-    "participants": ["Mike", "Emma"],
-    "icons": ["car", "calendar"],
-    "date": "2024-11-16",
-    "duration": "3h"
+    "title": "Coding Session 💻",
+    "description": "Pair programming session to work on your coding projects together.",
+    "duration": 90,
+    "active": true,
+    "bookings": 15,
+    "created": "2024-11-12"
   }
 ]
