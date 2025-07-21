@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
-import { MapPin, Clock, Car, Train, Bike } from 'lucide-react-native';
+import { MapPin, Clock, Car, Brain as Train, Bike } from 'lucide-react-native';
 
 export default function RoutesScreen() {
   const routes = [

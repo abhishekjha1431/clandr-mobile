@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { MapPin, Calendar, Car, Bike, Train, Users } from 'lucide-react-native';
+import { MapPin, Calendar, Car, Bike, Brain as Train, Users } from 'lucide-react-native';
 
 interface Event {
   id: number;
