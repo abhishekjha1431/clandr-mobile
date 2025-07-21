@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, Alert } from 'react-native';
-import { Copy, Edit, Plus } from 'lucide-react-native';
+import { Copy, LocationEdit as Edit, Plus } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import EditEventModal from '../../components/EditEventModal';
 import eventsData from '../../data/events.json';
