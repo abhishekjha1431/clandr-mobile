@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, Alert } from 'react-native';
-import { Copy, LocationEdit as Edit, Plus } from 'lucide-react-native';
+import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, TextInput } from 'react-native';
+import { Search, Plus, MoreHorizontal, User, ChevronDown, Menu } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import EditEventModal from '../../components/EditEventModal';
 import eventsData from '../../data/events.json';
@@ -19,14 +19,26 @@ export default function MyEventsScreen() {
   const [events, setEvents] = useState<Event[]>(eventsData as Event[]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDay, setSelectedDay] = useState('Today');
 
   const activeEvents = events.filter(event => event.active);
-  const inactiveEvents = events.filter(event => !event.active);
+  const todayEvents = activeEvents.slice(0, 2); // Mock today's events
+  const tomorrowEvents = activeEvents.slice(2, 3); // Mock tomorrow's events
 
-  const copyEventDetails = async (event: Event) => {
-    const eventText = `${event.title}\n\nDuration: ${event.duration} minutes\n\n${event.description}`;
-    await Clipboard.setStringAsync(eventText);
-    Alert.alert('Copied!', 'Event details copied to clipboard');
+  const getCurrentDate = () => {
+    const today = new Date();
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      day: 'numeric', 
+      month: 'short' 
+    };
+    return today.toLocaleDateString('en-US', options);
+  };
+
+  const getCurrentMonth = () => {
+    const today = new Date();
+    return today.toLocaleDateString('en-US', { month: 'long' });
   };
 
   const handleEditEvent = (event: Event) => {
@@ -44,113 +56,165 @@ export default function MyEventsScreen() {
     setEvents(events.filter(event => event.id !== eventId));
   };
 
-  const EventCard = ({ event, isActive }: { event: Event; isActive: boolean }) => (
-    <View className={`bg-white rounded-3xl shadow-lg p-6 mb-4 ${!isActive ? 'opacity-60' : ''}`}>
-      {/* Header */}
+  const getEventColor = (index: number) => {
+    const colors = ['bg-blue-500', 'bg-cyan-500', 'bg-purple-500', 'bg-green-500'];
+    return colors[index % colors.length];
+  };
+
+  const getParticipantInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  const EventCard = ({ event, index }: { event: Event; index: number }) => (
+    <TouchableOpacity
+      onPress={() => handleEditEvent(event)}
+      className={`${getEventColor(index)} rounded-3xl p-6 mb-4 shadow-lg`}
+    >
       <View className="flex-row items-start justify-between mb-4">
         <View className="flex-1">
-          <Text className="text-xl font-bold text-gray-800 mb-2">{event.title}</Text>
-          <View className="flex-row items-center">
-            <View className={`w-3 h-3 rounded-full mr-2 ${isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
-            <Text className={`text-sm font-medium ${isActive ? 'text-green-600' : 'text-gray-500'}`}>
-              {isActive ? 'Active' : 'Inactive'}
+          <Text className="text-white text-xl font-bold mb-2">{event.title}</Text>
+          <Text className="text-white/80 text-sm">
+            {new Date().toLocaleTimeString('en-US', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: true 
+            })} - {new Date(Date.now() + event.duration * 60000).toLocaleTimeString('en-US', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: true 
+            })}
+          </Text>
+        </View>
+        <View className="flex-row items-center">
+          <TouchableOpacity className="w-8 h-8 rounded-full bg-white/20 items-center justify-center mr-2">
+            <MoreHorizontal size={16} color="white" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Participant Avatars */}
+      <View className="flex-row items-center">
+        {['John', 'Sarah', 'Mike'].slice(0, 3).map((participant, idx) => (
+          <View
+            key={idx}
+            className="w-8 h-8 rounded-full bg-white items-center justify-center mr-2 shadow-sm"
+            style={{ marginLeft: idx > 0 ? -8 : 0 }}
+          >
+            <Text className="text-gray-700 text-xs font-bold">
+              {getParticipantInitials(participant)}
             </Text>
           </View>
-        </View>
-        <View className="flex-row space-x-2">
-          <TouchableOpacity
-            onPress={() => copyEventDetails(event)}
-            className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center"
-          >
-            <Copy size={18} color="#3B82F6" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => handleEditEvent(event)}
-            className="w-10 h-10 rounded-full bg-gray-50 items-center justify-center"
-          >
-            <Edit size={18} color="#6B7280" />
-          </TouchableOpacity>
-        </View>
+        ))}
+        {event.bookings > 3 && (
+          <View className="w-8 h-8 rounded-full bg-white/20 items-center justify-center ml-2">
+            <Text className="text-white text-xs font-bold">+{event.bookings - 3}</Text>
+          </View>
+        )}
       </View>
-
-      {/* Duration */}
-      <View className="bg-blue-50 rounded-2xl p-4 mb-4">
-        <Text className="text-blue-600 font-semibold text-lg">{event.duration} minutes</Text>
-        <Text className="text-blue-500 text-sm">Duration</Text>
-      </View>
-
-      {/* Description */}
-      <Text className="text-gray-600 mb-4 leading-6">{event.description}</Text>
-
-      {/* Stats */}
-      <View className="flex-row items-center justify-between pt-4 border-t border-gray-100">
-        <Text className="text-gray-500 text-sm">{event.bookings} bookings</Text>
-        <Text className="text-gray-500 text-sm">Created {new Date(event.created).toLocaleDateString()}</Text>
-      </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View className="pt-4 pb-6 px-4">
-          <View className="flex-row items-center justify-between">
-            <View>
-              <Text className="text-3xl font-bold text-gray-800 mb-2">My Events</Text>
-              <Text className="text-gray-600">Manage your bookable events</Text>
+        <View className="px-4 pt-4 pb-6">
+          <View className="flex-row items-center justify-between mb-6">
+            <View className="flex-row items-center">
+              <TouchableOpacity className="w-10 h-10 rounded-full bg-white shadow-md items-center justify-center mr-4">
+                <Menu size={20} color="#374151" />
+              </TouchableOpacity>
+              <View className="flex-row items-center">
+                <Text className="text-xl font-bold text-gray-800 mr-2">{getCurrentMonth()}</Text>
+                <ChevronDown size={20} color="#6B7280" />
+              </View>
             </View>
-            <TouchableOpacity className="w-12 h-12 rounded-full bg-blue-500 items-center justify-center shadow-lg">
-              <Plus size={24} color="white" />
-            </TouchableOpacity>
+            <View className="w-12 h-12 rounded-full bg-blue-500 items-center justify-center shadow-lg">
+              <User size={24} color="white" />
+            </View>
           </View>
-        </View>
 
-        {/* Stats */}
-        <View className="flex-row px-4 mb-6 space-x-3">
-          <View className="bg-white rounded-3xl shadow-lg p-4 flex-1">
-            <Text className="text-2xl font-bold text-blue-600">{activeEvents.length}</Text>
-            <Text className="text-gray-600 text-sm">Active Events</Text>
-          </View>
-          <View className="bg-white rounded-3xl shadow-lg p-4 flex-1">
-            <Text className="text-2xl font-bold text-green-600">
-              {events.reduce((sum, event) => sum + event.bookings, 0)}
-            </Text>
-            <Text className="text-gray-600 text-sm">Total Bookings</Text>
-          </View>
-        </View>
+          {/* Date and Title */}
+          <Text className="text-gray-600 text-base mb-2">{getCurrentDate()}</Text>
+          <Text className="text-3xl font-bold text-gray-800 mb-6">
+            You Have {todayEvents.length} {'\n'}Meetings Today
+          </Text>
 
-        {/* Active Events */}
-        {activeEvents.length > 0 && (
-          <View className="px-4 mb-6">
-            <Text className="text-xl font-bold text-gray-800 mb-4">Active Events</Text>
-            {activeEvents.map((event) => (
-              <EventCard key={event.id} event={event} isActive={true} />
+          {/* Search Bar */}
+          <View className="bg-white rounded-2xl shadow-md p-4 mb-6 flex-row items-center">
+            <Search size={20} color="#9CA3AF" />
+            <TextInput
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Search event, meeting, etc..."
+              className="flex-1 ml-3 text-gray-700 text-base"
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
+
+          {/* Day Tabs */}
+          <View className="flex-row mb-4">
+            {[
+              { label: 'Today', count: todayEvents.length },
+              { label: 'Tomorrow', count: tomorrowEvents.length },
+              { label: '26 Aug', count: 6 }
+            ].map((day, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => setSelectedDay(day.label)}
+                className={`mr-4 px-4 py-2 rounded-full ${
+                  selectedDay === day.label 
+                    ? 'bg-gray-800' 
+                    : 'bg-white shadow-sm'
+                }`}
+              >
+                <Text className={`font-semibold ${
+                  selectedDay === day.label 
+                    ? 'text-white' 
+                    : 'text-gray-600'
+                }`}>
+                  {day.label} ({day.count})
+                </Text>
+              </TouchableOpacity>
             ))}
           </View>
-        )}
 
-        {/* Inactive Events */}
-        {inactiveEvents.length > 0 && (
-          <View className="px-4 mb-6">
-            <Text className="text-xl font-bold text-gray-800 mb-4">Inactive Events</Text>
-            {inactiveEvents.map((event) => (
-              <EventCard key={event.id} event={event} isActive={false} />
-            ))}
-          </View>
-        )}
+          {/* Motivational Text */}
+          <Text className="text-gray-500 text-sm mb-6 leading-5">
+            It's a good day to start any event, you can make important decisions or plan them.
+          </Text>
+        </View>
 
-        {/* Empty State */}
-        {events.length === 0 && (
-          <View className="bg-white rounded-3xl shadow-lg p-8 mx-4 items-center">
-            <Text className="text-gray-500 text-lg mb-2">No events yet</Text>
-            <Text className="text-gray-400 text-center">Create your first bookable event to get started</Text>
-          </View>
-        )}
+        {/* Events List */}
+        <View className="px-4">
+          {selectedDay === 'Today' && todayEvents.map((event, index) => (
+            <EventCard key={event.id} event={event} index={index} />
+          ))}
+          
+          {selectedDay === 'Tomorrow' && tomorrowEvents.map((event, index) => (
+            <EventCard key={event.id} event={event} index={index + 2} />
+          ))}
+
+          {selectedDay === '26 Aug' && (
+            <View className="bg-white rounded-3xl p-8 items-center shadow-lg">
+              <Text className="text-gray-500 text-lg mb-2">No events scheduled</Text>
+              <Text className="text-gray-400 text-center">
+                Create your first event for this date
+              </Text>
+            </View>
+          )}
+        </View>
 
         {/* Bottom Spacing */}
         <View className="h-20" />
       </ScrollView>
+
+      {/* Floating Action Button */}
+      <View className="absolute bottom-6 right-6">
+        <TouchableOpacity className="w-14 h-14 bg-gray-800 rounded-full items-center justify-center shadow-lg">
+          <Plus size={24} color="white" />
+        </TouchableOpacity>
+      </View>
 
       {/* Edit Modal */}
       <EditEventModal
